@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------#
 #              COMPLETE ANALYSIS AND MODEL COMPARISON                          #
-#       Theoretical Calibration (Optimization) of the Diffusion with Retention Model      #
+# Theoretical Calibration (Optimization) of the Diffusion with Retention Model #
 #------------------------------------------------------------------------------#
 
 # --- 1. Necessary Packages ---
@@ -83,7 +83,8 @@ objetive_function <- function(params, var_target, kurt_target) {
   dt <- 1
   var_theoretical <- 2 * (1 - k) * K2 * dt
   if (var_theoretical < 1e-9) return(1e9)
-  kurt_theoretical <- (12 * k * (1 - k) * K4 * dt) / (var_theoretical^2)
+  kurt_theoretical <- ((12 * (1 - k)^2 * K2^2 * dt) + (24 * k * (1-k) * K4 * dt))/(var_theoretical)^2
+  if (kurt_theoretical < 3) return(4)
   error_var <- ((var_theoretical - var_target) / var_target)^2
   error_kurt <- ((kurt_theoretical - kurt_target) / kurt_target)^2
   return(error_var + error_kurt)
@@ -119,7 +120,8 @@ dt <- 1
 var_theoretical_final <- 2 * (1 - k_calibrated) * K2_calibrated * dt
 
 # Calculate theoretical excess kurtosis
-kurt_theoretical_final <- (12 * k_calibrated * (1 - k_calibrated) * K4_calibrated * dt) / (var_theoretical_final^2)
+kurt_theoretical_final <- (12 * (1 - k_calibrated)^2 * K2_calibrated^2 * dt + 24 * k_calibrated * (1-k_calibrated) * K4_calibrated * dt) / (var_theoretical_final^2)
+#kurt_theoretical_final <- theoretical_kurtosis(k_cal, K2_cal, K4_cal, var_emp, 3)
 
 cat("--- Calibration Verification ---\n")
 cat("Empirical Variance (Target):", var_emp, "\n")
@@ -256,3 +258,4 @@ abline(a = intercept, b = slope, col = "blue", lwd = 2)
 
 # Resets the graphical layout to default
 par(mfrow = c(1, 1))
+
